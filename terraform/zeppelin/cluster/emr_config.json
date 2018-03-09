@@ -1,0 +1,36 @@
+[
+  {
+    "Classification": "spark-defaults",
+    "Properties": {
+      "maximizeResourceAllocation": "true",
+      "spark.dynamicAllocation.enabled" : "false",
+      "spark.network.timeout" : "300s",
+      "spark.executor.heartbeatInterval" : "30s",
+      "spark.sql.files.ignoreCorruptFiles" : "true",
+      "spark.serializer" : "org.apache.spark.serializer.KryoSerializer"
+    }
+  },
+  {
+    "Classification": "spark",
+    "Properties": {
+      "maximizeResourceAllocation": "true",
+      "spark.dynamicAllocation.enabled" : "false",
+      "spark.network.timeout" : "300s",
+      "spark.executor.heartbeatInterval" : "30s",
+      "spark.sql.files.ignoreCorruptFiles" : "true",
+      "spark.serializer" : "org.apache.spark.serializer.KryoSerializer"
+    }
+  },
+  {
+    "Classification": "zeppelin-env",
+    "Configurations": [
+      {
+        "Classification": "export",
+        "Configurations": [],
+        "Properties": {
+          "SPARK_SUBMIT_OPTIONS": "\"--packages JohnSnowLabs:spark-nlp:1.4.0  --jars s3://workshop-lviv/artifacts/warc-hadoop.jar,s3://workshop-lviv/artifacts/language-detector.jar\""
+        }
+      }
+    ]
+  }
+]
