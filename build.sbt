@@ -23,7 +23,7 @@ libraryDependencies ++=
     "org.scalatest" %% "scalatest" % "3.0.5" % "test"
   )
 
-assemblyMergeStrategy in assembly := {
+/*assemblyMergeStrategy in assembly := {
     case x =>
         val oldStrategy = (assemblyMergeStrategy in assembly).value
         oldStrategy(x)
@@ -31,4 +31,4 @@ assemblyMergeStrategy in assembly := {
 
 assemblyShadeRules in assembly := Seq(
   ShadeRule.rename("com.google.**" -> "shaded.google.@1").inAll
-)
+)*/
