@@ -2,6 +2,7 @@ package com.grammarly.workshop
 
 import java.net.URL
 
+import com.grammarly.workshop.model.Record
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 import com.martinkl.warc._
 import com.martinkl.warc.mapreduce._
@@ -77,5 +78,3 @@ object FilterEnglishTexts {
   }
 
 }
-
-case class Record(uri: String, domain: String, content: String)

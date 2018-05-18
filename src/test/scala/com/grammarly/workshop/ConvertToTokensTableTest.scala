@@ -1,5 +1,6 @@
 package com.grammarly.workshop
 
+import com.grammarly.workshop.model.{Record, TokenRow}
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 

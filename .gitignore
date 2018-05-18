@@ -1,3 +1,5 @@
+.idea/*
+target
 */.terraform
 */terraform.tfstate*
 */header.tf

@@ -1,5 +1,6 @@
 package com.grammarly.workshop
 
+import com.grammarly.workshop.model.{AnnotatedRecord, Record, TokenRow}
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 import com.johnsnowlabs.nlp._
 import com.johnsnowlabs.nlp.annotators._
@@ -37,11 +38,11 @@ object ConvertToTokensTable {
       .setOutputCol("sentence")
 
     val regexTokenizer = new Tokenizer()
-      .setInputCols(Array("sentence"))
+      .setInputCols("sentence")
       .setOutputCol("token")
 
     val posTagger = new PerceptronApproach()
-      .setInputCols(Array("sentence", "token"))
+      .setInputCols("sentence", "token")
       .setOutputCol("pos")
 
     val finisher = new Finisher()
@@ -67,12 +68,12 @@ object ConvertToTokensTable {
       .flatMap { ar =>
         val docLength = ar.document.head.end
         val sentences = ar.sentence.zipWithIndex.map { case (sa, ind) =>
-          (sa.start, sa.end, ind)
+          (sa.begin, sa.end, ind)
         }
 
         ar.pos.zipWithIndex.map { case (pa, ind) =>
           val (sentStart, sentEnd, sentPos) = sentences.collectFirst {
-            case sent@(s, e, i) if pa.start >= s && pa.end <= e => sent
+            case sent@(s, e, i) if pa.begin >= s && pa.end <= e => sent
           } getOrElse (-1, -1, -1)
 
           TokenRow(
@@ -80,7 +81,7 @@ object ConvertToTokensTable {
             domain = ar.domain,
             token = pa.metadata("word"),
             posTag = pa.result,
-            tokenStart = pa.start,
+            tokenStart = pa.begin,
             tokenEnd = pa.end,
             tokenPos = ind,
             sentenceStart = sentStart,
@@ -94,8 +95,5 @@ object ConvertToTokensTable {
 
 }
 
-case class Annotation(annotatorType: String, start: Int, end: Int, result: String, metadata: Map[String, String])
 
-case class AnnotatedRecord(uri: String, domain: String, content: String, document: Array[Annotation], sentence: Array[Annotation], pos: Array[Annotation])
 
-case class TokenRow(uri: String, domain: String, token: String, posTag: String, tokenStart: Int, tokenEnd: Int, tokenPos: Int, sentenceStart: Int, sentenceEnd: Int, sentencePos: Int, docLength: Int)
