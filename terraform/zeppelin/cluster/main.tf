@@ -1,99 +1,64 @@
 terraform {
-  required_version = ">= 0.9.0"
+  required_version = ">= 0.11.6"
   backend "s3" {
-    bucket = "workshop-lviv"
-    key    = "terraform/zeppelin"
-    region = "us-west-1"
+    bucket = "state-000000000000"
+    key    = "core/zeppelin/dw/cluster/"
+    region = "us-east-1"
   }
 }
 
-data "aws_iam_instance_profile" "profile" {
-  name = "core_zeppelin_profile"
+provider "aws" {
+  region     = "us-east-1"
+  allowed_account_ids = ["000000000000"]
 }
 
-data "aws_iam_role" "service_role" {
-  name = "core_zeppelin_service_role"
-}
+variable "env" { default = "dw" }
+variable "cluster_name" { default = "zeppelin" }
+variable "master_type" { default = "c4.2xlarge" }
+variable "core_count" { default = 10 }
+variable "core_volume_type" { default = "standard" }
+variable "core_volume_gb" { default = 400 }
+variable "core_type" { default = "c4.2xlarge" }
+variable "task_count" { default = 10 }
+variable "task_type" { default = "c4.2xlarge" }
+variable "task_volume_type" { default = "standard" }
+variable "task_volume_gb" { default = 100 }
+variable "subnet" { default = "subnet-abb1e6ce" }
+variable "artifacts_bucket" { default = "gr-dw-statistics" }
+variable "artifacts_path" { default = "artifacts" }
+variable "logs_bucket" { default = "cc-processing" }
+variable "logs_path" { default = "logs/zeppelin" }
 
-data "aws_security_group" "zeppelin_sg" {
-  name = "core_emr_zeppelin_sg"
-}
+module "emr" {
+  source = "../../emr/cluster/"
 
-variable "vpc_id" {
-  #set your VPC id here
-  default = "vpc-9ce254f9"
-}
+  env = "${var.env}"
+  cluster_name = "${var.cluster_name}"
+  key_name = "dw_key"
 
-variable "cluster_size" {
-  default = 3
-}
+  master_type = "${var.master_type}"
 
-variable "master" {
-  default = "c4.2xlarge"
-}
+  core_count = "${var.core_count}"
+  core_type = "${var.core_type}"
+  core_volume_type = "${var.core_volume_type}"
+  core_volume_gb = "${var.core_volume_gb}"
 
-variable "core" {
-  default = "c4.2xlarge"
-}
+  task_count = "${var.task_count}"
+  task_type = "${var.task_type}"
+  task_volume_type = "${var.task_volume_type}"
+  task_volume_gb = "${var.task_volume_gb}"
 
-variable "subnet" {
-  default = "subnet-5b70ad02"
-}
+  subnet = "${var.subnet}"
 
-variable "apps" {
-  type = "list"
-  default = ["Spark", "Zeppelin"]
-}
+  artifacts_bucket = "${var.artifacts_bucket}"
+  artifacts_path = "${var.artifacts_path}"
 
-variable "ssh_key" {
-  default = "~/.ssh/dev_workshop.pem"
-}
+  logs_bucket = "${var.logs_bucket}"
+  logs_path = "${var.logs_path}"
 
-resource "aws_emr_cluster" "zeppelin-cluster" {
-  name          = "emr-zeppelin-${terraform.workspace}"
-  release_label = "emr-5.11.1"
-  applications  = "${var.apps}"
-
-  visible_to_all_users = true
-  termination_protection = false
-  keep_job_flow_alive_when_no_steps = true
-
-  ec2_attributes {
-    key_name                          = "dev-workshop" #insert name of your keipair here
-    subnet_id                         = "${var.subnet}"
-    additional_master_security_groups = "${data.aws_security_group.zeppelin_sg.id}"
-    additional_slave_security_groups  = "${data.aws_security_group.zeppelin_sg.id}"
-    instance_profile                  = "${data.aws_iam_instance_profile.profile.arn}"
-  }
-
-  master_instance_type = "${var.master}"
-  core_instance_type   = "${var.core}"
-  core_instance_count  = "${var.cluster_size}"
-
-  log_uri = "s3://workshop-lviv/logs/zeppelin/${terraform.workspace}/"
-
-  service_role = "${data.aws_iam_role.service_role.arn}"
-
-  configurations = "emr_config.json"
-}
-
-resource "null_resource" "run_emr_socks_proxy" {
-  depends_on = ["aws_emr_cluster.zeppelin-cluster"]
-
-  provisioner "local-exec" {
-    command = "nohup aws emr socks --cluster-id ${aws_emr_cluster.zeppelin-cluster.id} --key-pair ${var.ssh_key} > /dev/null 2> /dev/null &"
-  }
-}
-
-resource "null_resource" "open_zeppelin" {
-  depends_on = ["null_resource.run_emr_socks_proxy"]
-
-  provisioner "local-exec" {
-    command = "sleep 5 && open http://${aws_emr_cluster.zeppelin-cluster.master_public_dns}:8890"
-  }
+  emr_config = "emr_config.json"
 }
 
 output "cluster_id" {
-  value = "${aws_emr_cluster.zeppelin-cluster.id}"
+  value = "${module.emr.cluster_id}"
 }
-

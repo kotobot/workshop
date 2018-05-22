@@ -28,7 +28,7 @@
         "Classification": "export",
         "Configurations": [],
         "Properties": {
-          "SPARK_SUBMIT_OPTIONS": "\"--packages JohnSnowLabs:spark-nlp:1.4.0  --jars s3://workshop-lviv/artifacts/warc-hadoop.jar,s3://workshop-lviv/artifacts/language-detector.jar\""
+          "SPARK_SUBMIT_OPTIONS": "\"--packages JohnSnowLabs:spark-nlp:1.5.3  --jars s3://cc-processing/artifacts/warc-hadoop.jar,s3://cc-processing/artifacts/language-detector.jar\""
         }
       }
     ]

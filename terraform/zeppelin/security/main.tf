@@ -1,15 +1,18 @@
 terraform {
-  required_version = ">= 0.9.0"
+  required_version = ">= 0.11.6"
   backend "s3" {
-    bucket = "workshop-lviv"
-    key    = "terraform/security"
-    region = "us-west-1"
+    bucket = "state-000000000000"
+    key    = "core/zeppelin/dw/security/"
+    region = "us-east-1"
   }
 }
 
-variable "vpc_id" {
-  default = "vpc-9ce254f9"
+provider "aws" {
+  region     = "us-east-1"
+  allowed_account_ids = ["000000000000"]
 }
+
+variable "vpc_id" { default = "vpc-50d6d336" }
 
 resource "aws_iam_role" "zeppelin_service_role" {
   name = "core_zeppelin_service_role"
@@ -77,7 +80,7 @@ resource "aws_security_group" "emr_zeppelin_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
   egress {

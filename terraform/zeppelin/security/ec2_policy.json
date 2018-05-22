@@ -19,8 +19,8 @@
         "s3:*"
       ],
       "Resource": [
-        "arn:aws:s3:::workshop-lviv",
-        "arn:aws:s3:::workshop-lviv/*",
+        "arn:aws:s3:::cc-processing",
+        "arn:aws:s3:::cc-processing/*",
         "arn:aws:s3:::commoncrawl",
         "arn:aws:s3:::commoncrawl/*"
       ]
